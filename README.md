@@ -20,6 +20,11 @@ This is our fresh start version for Assignment 6.
   - filter by category and location
   - check expiring soon
   - check low stock
+- `GroceryList` methods:
+  - add/remove items
+  - prevent duplicate items (case-insensitive)
+- `GroceryPlanner`:
+  - add low-stock inventory items into grocery list
 
 ## Run tests
 
@@ -29,6 +34,5 @@ mvn test
 
 ## Next steps
 
-- Add grocery list model + tests
 - Add first JavaFX screen
 - Add save/load
