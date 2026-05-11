@@ -40,4 +40,21 @@ class CsvShareTest {
                 lines
         );
     }
+
+    @Test
+    void exportGroceryListMatchesInventoryCaseInsensitiveAndEscapesCommas(@TempDir Path tempDir) throws IOException {
+        CsvShare csv = new CsvShare();
+        Path file = tempDir.resolve("grocery-escaped.csv");
+
+        List<FoodItem> inventory = List.of(
+                new FoodItem("greek yogurt", "", FoodCategory.DAIRY, StorageLocation.FRIDGE, 2,
+                        LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 20))
+        );
+
+        csv.exportGroceryList(List.of("Greek Yogurt", "bread, whole wheat"), inventory, file);
+        List<String> lines = Files.readAllLines(file);
+
+        assertEquals("1,Greek Yogurt,FRIDGE,2", lines.get(1));
+        assertEquals("2,\"bread, whole wheat\",,", lines.get(2));
+    }
 }

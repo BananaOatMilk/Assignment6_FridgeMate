@@ -36,4 +36,16 @@ class GroceryListTest {
 
         assertThrows(IllegalArgumentException.class, () -> groceryList.addItem(" "));
     }
+
+    @Test
+    void removeNullAndClearDoNotBreakList() {
+        GroceryList groceryList = new GroceryList();
+        groceryList.addItem("Bread");
+
+        groceryList.removeItem(null);
+        assertEquals(List.of("Bread"), groceryList.getItems());
+
+        groceryList.clear();
+        assertEquals(List.of(), groceryList.getItems());
+    }
 }

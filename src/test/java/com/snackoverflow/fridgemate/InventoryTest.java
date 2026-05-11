@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -44,6 +45,23 @@ class InventoryTest {
         inventory.addItem(pasta);
 
         assertEquals(List.of(yogurt), inventory.expiringSoon(LocalDate.of(2026, 5, 1)));
+    }
+
+    @Test
+    void findByIdLowStockAndByCategoryWork() {
+        Inventory inventory = new Inventory(new DefaultExpirationPolicy(7));
+        FoodItem eggs = item("Eggs", FoodCategory.PROTEIN, StorageLocation.FRIDGE, 1, LocalDate.of(2026, 5, 10));
+        FoodItem oats = item("Oats", FoodCategory.GRAINS, StorageLocation.PANTRY, 4, LocalDate.of(2026, 12, 1));
+
+        inventory.addItem(eggs);
+        inventory.addItem(oats);
+
+        assertTrue(inventory.findById(eggs.getId()).isPresent());
+        assertEquals(List.of(eggs), inventory.lowStock(1));
+
+        Map<FoodCategory, List<FoodItem>> grouped = inventory.byCategory();
+        assertEquals(List.of(eggs), grouped.get(FoodCategory.PROTEIN));
+        assertEquals(List.of(oats), grouped.get(FoodCategory.GRAINS));
     }
 
     @Test
