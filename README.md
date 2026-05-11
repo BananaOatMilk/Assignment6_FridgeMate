@@ -32,6 +32,12 @@ This is our fresh start version for Assignment 6.
 mvn test
 ```
 
+## Run app
+
+```bash
+mvn javafx:run
+```
+
 ## Next steps
 
 - Add first JavaFX screen
