@@ -28,6 +28,8 @@ This is our fresh start version for Assignment 6.
 - JavaFX app shell:
   - add/delete inventory items
   - add low-stock items to grocery list
+  - filter inventory by category/location
+  - view expiring-soon items
 - Data features:
   - save/load app data to `fridgemate-data.json`
   - export/import inventory as CSV
@@ -47,5 +49,3 @@ mvn javafx:run
 ## Next steps
 
 - Add recipe suggestions
-- Add inventory filter controls
-- Add expiring-soon view

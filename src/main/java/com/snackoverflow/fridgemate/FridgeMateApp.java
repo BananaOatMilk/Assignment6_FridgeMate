@@ -19,6 +19,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TableColumn;
@@ -47,8 +48,11 @@ public class FridgeMateApp extends Application {
 
     private final ObservableList<FoodItem> inventoryRows = FXCollections.observableArrayList();
     private final ObservableList<String> groceryRows = FXCollections.observableArrayList();
+    private final ObservableList<FoodItem> expiringRows = FXCollections.observableArrayList();
 
     private TableView<FoodItem> inventoryTable;
+    private ComboBox<FoodCategory> filterCategoryBox;
+    private ComboBox<StorageLocation> filterLocationBox;
     private Label statusLabel;
 
     @Override
@@ -63,8 +67,9 @@ public class FridgeMateApp extends Application {
         inventoryTable = createInventoryTable();
         VBox inventoryPanel = createInventoryPanel(stage);
         VBox groceryPanel = createGroceryPanel();
+        VBox expiringPanel = createExpiringPanel();
 
-        HBox center = new HBox(12, inventoryPanel, groceryPanel);
+        HBox center = new HBox(12, inventoryPanel, groceryPanel, expiringPanel);
         root.setCenter(center);
 
         statusLabel = new Label("Ready");
@@ -79,7 +84,7 @@ public class FridgeMateApp extends Application {
 
         refreshViews();
 
-        Scene scene = new Scene(root, 980, 620);
+        Scene scene = new Scene(root, 1220, 620);
         stage.setTitle("FridgeMate");
         stage.setScene(scene);
         stage.show();
@@ -111,6 +116,22 @@ public class FridgeMateApp extends Application {
 
         Spinner<Integer> quantitySpinner = new Spinner<>(1, 999, 1);
         DatePicker expirationPicker = new DatePicker(LocalDate.now().plusDays(7));
+
+        filterCategoryBox = new ComboBox<>(FXCollections.observableArrayList(FoodCategory.values()));
+        filterCategoryBox.setPromptText("Filter category");
+        filterLocationBox = new ComboBox<>(FXCollections.observableArrayList(StorageLocation.values()));
+        filterLocationBox.setPromptText("Filter location");
+
+        Button applyFilterButton = new Button("Apply Filter");
+        applyFilterButton.setOnAction(event -> applyCurrentFilter());
+
+        Button clearFilterButton = new Button("Clear Filter");
+        clearFilterButton.setOnAction(event -> {
+            filterCategoryBox.setValue(null);
+            filterLocationBox.setValue(null);
+            applyCurrentFilter();
+            setStatus("Cleared filters");
+        });
 
         Button addButton = new Button("Add Item");
         addButton.setOnAction(event -> {
@@ -211,9 +232,10 @@ public class FridgeMateApp extends Application {
         form.addRow(3, new Label("Quantity"), quantitySpinner);
         form.addRow(4, new Label("Expiration"), expirationPicker);
 
+        HBox filterRow = new HBox(8, filterCategoryBox, filterLocationBox, applyFilterButton, clearFilterButton);
         HBox actions = new HBox(8, addButton, deleteButton, saveButton, loadButton, exportButton, importButton);
-        VBox panel = new VBox(10, new Label("Inventory"), form, actions, inventoryTable);
-        panel.setPrefWidth(660);
+        VBox panel = new VBox(10, new Label("Inventory"), form, filterRow, actions, inventoryTable);
+        panel.setPrefWidth(650);
         return panel;
     }
 
@@ -228,7 +250,30 @@ public class FridgeMateApp extends Application {
         });
 
         VBox panel = new VBox(10, new Label("Grocery List"), addLowStock, groceryListView);
-        panel.setPrefWidth(300);
+        panel.setPrefWidth(260);
+        return panel;
+    }
+
+    private VBox createExpiringPanel() {
+        ListView<FoodItem> expiringList = new ListView<>(expiringRows);
+        expiringList.setCellFactory(list -> new ListCell<>() {
+            @Override
+            protected void updateItem(FoodItem item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    long days = item.daysUntilExpiration(LocalDate.now());
+                    setText(item.getName() + " (" + item.getExpirationDate() + ", " + days + " day(s) left)");
+                }
+            }
+        });
+
+        Button refreshButton = new Button("Refresh Expiring");
+        refreshButton.setOnAction(event -> refreshViews());
+
+        VBox panel = new VBox(10, new Label("Expiring Soon"), refreshButton, expiringList);
+        panel.setPrefWidth(280);
         return panel;
     }
 
@@ -239,8 +284,15 @@ public class FridgeMateApp extends Application {
     }
 
     private void refreshViews() {
-        inventoryRows.setAll(manager.getInventoryItems());
+        applyCurrentFilter();
         groceryRows.setAll(manager.getGroceryItems());
+        expiringRows.setAll(manager.getExpiringItems(LocalDate.now()));
+    }
+
+    private void applyCurrentFilter() {
+        FoodCategory category = filterCategoryBox == null ? null : filterCategoryBox.getValue();
+        StorageLocation location = filterLocationBox == null ? null : filterLocationBox.getValue();
+        inventoryRows.setAll(manager.filterInventory(category, location));
     }
 
     private void setStatus(String message) {
