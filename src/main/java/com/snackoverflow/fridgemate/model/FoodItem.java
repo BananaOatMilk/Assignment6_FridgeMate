@@ -8,7 +8,6 @@ import java.util.UUID;
 public class FoodItem {
     private final String id;
     private String name;
-    private String description;
     private FoodCategory category;
     private StorageLocation location;
     private int quantity;
@@ -16,18 +15,16 @@ public class FoodItem {
     private LocalDate expirationDate;
 
     public FoodItem(String name,
-                    String description,
                     FoodCategory category,
                     StorageLocation location,
                     int quantity,
                     LocalDate dateAdded,
                     LocalDate expirationDate) {
-        this(UUID.randomUUID().toString(), name, description, category, location, quantity, dateAdded, expirationDate);
+        this(UUID.randomUUID().toString(), name, category, location, quantity, dateAdded, expirationDate);
     }
 
     public FoodItem(String id,
                     String name,
-                    String description,
                     FoodCategory category,
                     StorageLocation location,
                     int quantity,
@@ -38,7 +35,6 @@ public class FoodItem {
         }
         this.id = id;
         setName(name);
-        setDescription(description);
         setCategory(category);
         setLocation(location);
         setQuantity(quantity);
@@ -52,10 +48,6 @@ public class FoodItem {
 
     public String getName() {
         return name;
-    }
-
-    public String getDescription() {
-        return description;
     }
 
     public FoodCategory getCategory() {
@@ -83,10 +75,6 @@ public class FoodItem {
             throw new IllegalArgumentException("Item name is required");
         }
         this.name = name.trim();
-    }
-
-    public void setDescription(String description) {
-        this.description = description == null ? "" : description.trim();
     }
 
     public void setCategory(FoodCategory category) {

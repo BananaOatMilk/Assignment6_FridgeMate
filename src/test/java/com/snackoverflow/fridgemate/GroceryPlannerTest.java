@@ -17,9 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class GroceryPlannerTest {
     private FoodItem item(String name, int quantity) {
         return new FoodItem(
-                name,
-                "",
-                FoodCategory.OTHER,
+                name, FoodCategory.OTHER,
                 StorageLocation.PANTRY,
                 quantity,
                 LocalDate.of(2026, 5, 1),

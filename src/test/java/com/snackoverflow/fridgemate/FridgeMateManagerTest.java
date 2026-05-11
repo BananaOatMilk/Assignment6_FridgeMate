@@ -31,7 +31,7 @@ class FridgeMateManagerTest {
     }
 
     private FoodItem item(String name, FoodCategory category, StorageLocation location, int qty, LocalDate exp) {
-        return new FoodItem(name, "", category, location, qty, LocalDate.of(2026, 5, 1), exp);
+        return new FoodItem(name, category, location, qty, LocalDate.of(2026, 5, 1), exp);
     }
 
     @Test

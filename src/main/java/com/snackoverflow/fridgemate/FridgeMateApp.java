@@ -176,9 +176,7 @@ public class FridgeMateApp extends Application {
         addButton.setOnAction(event -> {
             try {
                 FoodItem item = new FoodItem(
-                        nameField.getText(),
-                        "",
-                        categoryBox.getValue(),
+                        nameField.getText(), categoryBox.getValue(),
                         locationBox.getValue(),
                         quantitySpinner.getValue(),
                         LocalDate.now(),

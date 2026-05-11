@@ -34,9 +34,7 @@ class LocalJsonStorageTest {
 
         AppData toSave = new AppData();
         toSave.setItems(List.of(new FoodItem(
-                "Milk",
-                "",
-                FoodCategory.DAIRY,
+                "Milk", FoodCategory.DAIRY,
                 StorageLocation.FRIDGE,
                 1,
                 LocalDate.of(2026, 5, 1),

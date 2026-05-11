@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class InventoryTest {
     private FoodItem item(String name, FoodCategory category, StorageLocation location, int quantity, LocalDate expirationDate) {
-        return new FoodItem(name, "", category, location, quantity, LocalDate.of(2026, 5, 1), expirationDate);
+        return new FoodItem(name, category, location, quantity, LocalDate.of(2026, 5, 1), expirationDate);
     }
 
     @Test
@@ -67,8 +67,8 @@ class InventoryTest {
     @Test
     void invalidItemInputThrowsException() {
         assertThrows(IllegalArgumentException.class, () ->
-                new FoodItem("", "", FoodCategory.OTHER, StorageLocation.PANTRY, 1, LocalDate.now(), LocalDate.now()));
+                new FoodItem("", FoodCategory.OTHER, StorageLocation.PANTRY, 1, LocalDate.now(), LocalDate.now()));
         assertThrows(IllegalArgumentException.class, () ->
-                new FoodItem("Beans", "", FoodCategory.OTHER, StorageLocation.PANTRY, 0, LocalDate.now(), LocalDate.now()));
+                new FoodItem("Beans", FoodCategory.OTHER, StorageLocation.PANTRY, 0, LocalDate.now(), LocalDate.now()));
     }
 }

@@ -21,9 +21,9 @@ class CsvShareTest {
         Path file = tempDir.resolve("grocery.csv");
 
         List<FoodItem> inventory = List.of(
-                new FoodItem("Milk", "", FoodCategory.DAIRY, StorageLocation.FRIDGE, 1,
+                new FoodItem("Milk", FoodCategory.DAIRY, StorageLocation.FRIDGE, 1,
                         LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 8)),
-                new FoodItem("Eggs", "", FoodCategory.PROTEIN, StorageLocation.FRIDGE, 2,
+                new FoodItem("Eggs", FoodCategory.PROTEIN, StorageLocation.FRIDGE, 2,
                         LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 20))
         );
 
@@ -47,7 +47,7 @@ class CsvShareTest {
         Path file = tempDir.resolve("grocery-escaped.csv");
 
         List<FoodItem> inventory = List.of(
-                new FoodItem("greek yogurt", "", FoodCategory.DAIRY, StorageLocation.FRIDGE, 2,
+                new FoodItem("greek yogurt", FoodCategory.DAIRY, StorageLocation.FRIDGE, 2,
                         LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 20))
         );
 
