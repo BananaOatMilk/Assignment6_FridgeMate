@@ -34,12 +34,12 @@ public class FoodItem {
             throw new IllegalArgumentException("ID is required");
         }
         this.id = id;
-        setName(name);
-        setCategory(category);
-        setLocation(location);
-        setQuantity(quantity);
-        setDateAdded(dateAdded);
-        setExpirationDate(expirationDate);
+        this.name = requireName(name);
+        this.category = requireCategory(category);
+        this.location = requireLocation(location);
+        this.quantity = requireQuantity(quantity);
+        this.dateAdded = requireDateAdded(dateAdded);
+        this.expirationDate = requireExpirationDate(expirationDate);
     }
 
     public String getId() {
@@ -71,33 +71,27 @@ public class FoodItem {
     }
 
     public void setName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("Item name is required");
-        }
-        this.name = name.trim();
+        this.name = requireName(name);
     }
 
     public void setCategory(FoodCategory category) {
-        this.category = Objects.requireNonNull(category, "Category is required");
+        this.category = requireCategory(category);
     }
 
     public void setLocation(StorageLocation location) {
-        this.location = Objects.requireNonNull(location, "Location is required");
+        this.location = requireLocation(location);
     }
 
     public void setQuantity(int quantity) {
-        if (quantity < 1) {
-            throw new IllegalArgumentException("Quantity must be at least 1");
-        }
-        this.quantity = quantity;
+        this.quantity = requireQuantity(quantity);
     }
 
     public void setDateAdded(LocalDate dateAdded) {
-        this.dateAdded = Objects.requireNonNull(dateAdded, "Date added is required");
+        this.dateAdded = requireDateAdded(dateAdded);
     }
 
     public void setExpirationDate(LocalDate expirationDate) {
-        this.expirationDate = Objects.requireNonNull(expirationDate, "Expiration date is required");
+        this.expirationDate = requireExpirationDate(expirationDate);
     }
 
     public long daysUntilExpiration(LocalDate today) {
@@ -122,5 +116,35 @@ public class FoodItem {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    private static String requireName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Item name is required");
+        }
+        return name.trim();
+    }
+
+    private static FoodCategory requireCategory(FoodCategory category) {
+        return Objects.requireNonNull(category, "Category is required");
+    }
+
+    private static StorageLocation requireLocation(StorageLocation location) {
+        return Objects.requireNonNull(location, "Location is required");
+    }
+
+    private static int requireQuantity(int quantity) {
+        if (quantity < 1) {
+            throw new IllegalArgumentException("Quantity must be at least 1");
+        }
+        return quantity;
+    }
+
+    private static LocalDate requireDateAdded(LocalDate dateAdded) {
+        return Objects.requireNonNull(dateAdded, "Date added is required");
+    }
+
+    private static LocalDate requireExpirationDate(LocalDate expirationDate) {
+        return Objects.requireNonNull(expirationDate, "Expiration date is required");
     }
 }

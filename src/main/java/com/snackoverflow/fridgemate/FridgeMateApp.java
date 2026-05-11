@@ -113,13 +113,11 @@ public class FridgeMateApp extends Application {
     private TableView<FoodItem> createInventoryTable() {
         TableView<FoodItem> table = new TableView<>();
         table.setItems(inventoryRows);
-        table.getColumns().addAll(
-                column("Name", FoodItem::getName),
-                column("Category", item -> item.getCategory().name()),
-                column("Location", item -> item.getLocation().name()),
-                column("Qty", item -> String.valueOf(item.getQuantity())),
-                column("Expires", item -> item.getExpirationDate().toString())
-        );
+        table.getColumns().add(column("Name", FoodItem::getName));
+        table.getColumns().add(column("Category", item -> item.getCategory().name()));
+        table.getColumns().add(column("Location", item -> item.getLocation().name()));
+        table.getColumns().add(column("Qty", item -> String.valueOf(item.getQuantity())));
+        table.getColumns().add(column("Expires", item -> item.getExpirationDate().toString()));
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
         table.setPrefHeight(420);
         return table;
