@@ -42,4 +42,30 @@ class GroceryPlannerTest {
         assertEquals(0, secondAdded);
         assertEquals(List.of("Rice", "Beans"), groceryList.getItems());
     }
+    @Test
+    void addLowStockItemsAddsNothingWhenInventoryIsEmpty() {
+        Inventory inventory = new Inventory(new DefaultExpirationPolicy(7));
+        GroceryList groceryList = new GroceryList();
+        GroceryPlanner planner = new GroceryPlanner(inventory, groceryList);
+
+        int added = planner.addLowStockItems(1);
+
+        assertEquals(0, added);
+        assertEquals(List.of(), groceryList.getItems());
+    }
+    @Test
+    void addLowStockItemsUsesThresholdCorrectly() {
+        Inventory inventory = new Inventory(new DefaultExpirationPolicy(7));
+        GroceryList groceryList = new GroceryList();
+        GroceryPlanner planner = new GroceryPlanner(inventory, groceryList);
+
+        inventory.addItem(item("Rice", 2));
+        inventory.addItem(item("Pasta", 3));
+        inventory.addItem(item("Beans", 4));
+
+        int added = planner.addLowStockItems(3);
+    
+        assertEquals(2, added);
+        assertEquals(List.of("Rice", "Pasta"), groceryList.getItems());
+    }
 }
