@@ -48,4 +48,10 @@ class GroceryListTest {
         groceryList.clear();
         assertEquals(List.of(), groceryList.getItems());
     }
+    @Test
+    void addItemStoresTrimmedValue() {
+        GroceryList groceryList = new GroceryList();
+        groceryList.addItem("  Apples  ");
+        assertEquals(List.of("Apples"), groceryList.getItems());
+    }
 }
