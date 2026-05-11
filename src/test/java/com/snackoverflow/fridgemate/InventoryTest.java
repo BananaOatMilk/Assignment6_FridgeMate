@@ -6,6 +6,7 @@ import com.snackoverflow.fridgemate.model.StorageLocation;
 import com.snackoverflow.fridgemate.service.DefaultExpirationPolicy;
 import com.snackoverflow.fridgemate.service.Inventory;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -70,5 +71,28 @@ class InventoryTest {
                 new FoodItem("", FoodCategory.OTHER, StorageLocation.PANTRY, 1, LocalDate.now(), LocalDate.now()));
         assertThrows(IllegalArgumentException.class, () ->
                 new FoodItem("Beans", FoodCategory.OTHER, StorageLocation.PANTRY, 0, LocalDate.now(), LocalDate.now()));
+    }
+    @Test
+    void removingUnknownIdReturnsFalse() {
+        Inventory inventory = new Inventory(new DefaultExpirationPolicy(7));
+    
+        assertTrue(inventory.getAllItems().isEmpty());
+        assertEquals(false, inventory.removeItemById("fake-id"));
+    }
+    @Test
+    void removingUnknownIdReturnsFalse() {
+        Inventory inventory = new Inventory(new DefaultExpirationPolicy(7));
+    
+        assertFalse(inventory.removeItemById("fake-id"));
+    }
+    @Test
+    void filterWithNoMatchesReturnsEmptyList() {
+        Inventory inventory = new Inventory(new DefaultExpirationPolicy(7));
+        FoodItem milk = item("Milk", FoodCategory.DAIRY, StorageLocation.FRIDGE, 1,
+                LocalDate.of(2026, 5, 8));
+    
+        inventory.addItem(milk);
+    
+        assertEquals(List.of(), inventory.filter(FoodCategory.PROTEIN, StorageLocation.PANTRY));
     }
 }
