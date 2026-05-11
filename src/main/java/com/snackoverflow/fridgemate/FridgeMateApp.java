@@ -5,7 +5,7 @@ import com.snackoverflow.fridgemate.model.FoodItem;
 import com.snackoverflow.fridgemate.model.GroceryList;
 import com.snackoverflow.fridgemate.model.StorageLocation;
 import com.snackoverflow.fridgemate.service.DefaultExpirationPolicy;
-import com.snackoverflow.fridgemate.service.GroceryPlanner;
+import com.snackoverflow.fridgemate.service.FridgeMateManager;
 import com.snackoverflow.fridgemate.service.Inventory;
 import javafx.application.Application;
 import javafx.beans.property.SimpleStringProperty;
@@ -32,9 +32,10 @@ import java.time.LocalDate;
 import java.util.function.Function;
 
 public class FridgeMateApp extends Application {
-    private final Inventory inventory = new Inventory(new DefaultExpirationPolicy(7));
-    private final GroceryList groceryList = new GroceryList();
-    private final GroceryPlanner planner = new GroceryPlanner(inventory, groceryList);
+    private final FridgeMateManager manager = new FridgeMateManager(
+            new Inventory(new DefaultExpirationPolicy(7)),
+            new GroceryList()
+    );
 
     private final ObservableList<FoodItem> inventoryRows = FXCollections.observableArrayList();
     private final ObservableList<String> groceryRows = FXCollections.observableArrayList();
@@ -108,7 +109,7 @@ public class FridgeMateApp extends Application {
                         LocalDate.now(),
                         expirationPicker.getValue()
                 );
-                inventory.addItem(item);
+                manager.addFoodItem(item);
                 nameField.clear();
                 quantitySpinner.getValueFactory().setValue(1);
                 expirationPicker.setValue(LocalDate.now().plusDays(7));
@@ -126,7 +127,7 @@ public class FridgeMateApp extends Application {
                 setStatus("Select an item to delete");
                 return;
             }
-            inventory.removeItemById(selected.getId());
+            manager.removeFoodItemById(selected.getId());
             refreshViews();
             setStatus("Deleted " + selected.getName());
         });
@@ -151,7 +152,7 @@ public class FridgeMateApp extends Application {
 
         Button addLowStock = new Button("Add Low-Stock Items");
         addLowStock.setOnAction(event -> {
-            int added = planner.addLowStockItems(1);
+            int added = manager.addLowStockItemsToGrocery(1);
             refreshViews();
             setStatus("Added " + added + " low-stock item(s)");
         });
@@ -168,8 +169,8 @@ public class FridgeMateApp extends Application {
     }
 
     private void refreshViews() {
-        inventoryRows.setAll(inventory.getAllItems());
-        groceryRows.setAll(groceryList.getItems());
+        inventoryRows.setAll(manager.getInventoryItems());
+        groceryRows.setAll(manager.getGroceryItems());
     }
 
     private void setStatus(String message) {
