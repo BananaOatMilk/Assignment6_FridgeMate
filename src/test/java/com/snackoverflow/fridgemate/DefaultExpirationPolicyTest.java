@@ -21,12 +21,29 @@ class DefaultExpirationPolicyTest {
     @Test
     void policyCorrectlyFlagsInRangeItems() {
         DefaultExpirationPolicy policy = new DefaultExpirationPolicy(7);
-        FoodItem soon = new FoodItem("Milk", FoodCategory.DAIRY, StorageLocation.FRIDGE, 1,
-                LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 6));
-        FoodItem past = new FoodItem("Old Bread", FoodCategory.GRAINS, StorageLocation.PANTRY, 1,
-                LocalDate.of(2026, 5, 1), LocalDate.of(2026, 4, 30));
+        FoodItem soon = new FoodItem("Milk", FoodCategory.DAIRY, StorageLocation.FRIDGE, 1, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 6));
+        
+        FoodItem past = new FoodItem("Old Bread", FoodCategory.GRAINS, StorageLocation.PANTRY, 1, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 4, 30));
 
         assertTrue(policy.isExpiringSoon(soon, LocalDate.of(2026, 5, 1)));
         assertFalse(policy.isExpiringSoon(past, LocalDate.of(2026, 5, 1)));
+    }
+    @Test
+    void itemExpiringTodayIsExpiringSoon() {
+    DefaultExpirationPolicy policy = new DefaultExpirationPolicy(7);
+
+    FoodItem item = new FoodItem("Eggs", FoodCategory.DAIRY, StorageLocation.FRIDGE, 1, LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 1));
+
+    assertTrue(policy.isExpiringSoon(item, LocalDate.of(2026, 5, 1)));
+}
+
+    @Test
+    void itemOutsideWarningRangeIsNotExpiringSoon() {
+    DefaultExpirationPolicy policy = new DefaultExpirationPolicy(7);
+
+    FoodItem item = new FoodItem("Rice", FoodCategory.GRAINS, StorageLocation.PANTRY, 1,
+            LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 9));
+
+    assertFalse(policy.isExpiringSoon(item, LocalDate.of(2026, 5, 1)));
     }
 }
