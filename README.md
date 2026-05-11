@@ -25,6 +25,12 @@ This is our fresh start version for Assignment 6.
   - prevent duplicate items (case-insensitive)
 - `GroceryPlanner`:
   - add low-stock inventory items into grocery list
+- JavaFX app shell:
+  - add/delete inventory items
+  - add low-stock items to grocery list
+- Data features:
+  - save/load app data to `fridgemate-data.json`
+  - export/import inventory as CSV
 
 ## Run tests
 
@@ -40,5 +46,6 @@ mvn javafx:run
 
 ## Next steps
 
-- Add first JavaFX screen
-- Add save/load
+- Add recipe suggestions
+- Add inventory filter controls
+- Add expiring-soon view

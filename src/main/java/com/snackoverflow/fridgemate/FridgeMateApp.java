@@ -7,6 +7,8 @@ import com.snackoverflow.fridgemate.model.StorageLocation;
 import com.snackoverflow.fridgemate.service.DefaultExpirationPolicy;
 import com.snackoverflow.fridgemate.service.FridgeMateManager;
 import com.snackoverflow.fridgemate.service.Inventory;
+import com.snackoverflow.fridgemate.storage.CsvShare;
+import com.snackoverflow.fridgemate.storage.LocalJsonStorage;
 import javafx.application.Application;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -26,15 +28,21 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.function.Function;
 
 public class FridgeMateApp extends Application {
     private final FridgeMateManager manager = new FridgeMateManager(
             new Inventory(new DefaultExpirationPolicy(7)),
-            new GroceryList()
+            new GroceryList(),
+            new LocalJsonStorage(Path.of("fridgemate-data.json")),
+            new CsvShare()
     );
 
     private final ObservableList<FoodItem> inventoryRows = FXCollections.observableArrayList();
@@ -53,7 +61,7 @@ public class FridgeMateApp extends Application {
         root.setTop(title);
 
         inventoryTable = createInventoryTable();
-        VBox inventoryPanel = createInventoryPanel();
+        VBox inventoryPanel = createInventoryPanel(stage);
         VBox groceryPanel = createGroceryPanel();
 
         HBox center = new HBox(12, inventoryPanel, groceryPanel);
@@ -61,6 +69,13 @@ public class FridgeMateApp extends Application {
 
         statusLabel = new Label("Ready");
         root.setBottom(statusLabel);
+
+        try {
+            manager.load();
+            setStatus("Loaded saved data");
+        } catch (IOException ex) {
+            setStatus("No saved data loaded");
+        }
 
         refreshViews();
 
@@ -84,7 +99,7 @@ public class FridgeMateApp extends Application {
         return table;
     }
 
-    private VBox createInventoryPanel() {
+    private VBox createInventoryPanel(Stage stage) {
         TextField nameField = new TextField();
         nameField.setPromptText("Item name");
 
@@ -132,6 +147,61 @@ public class FridgeMateApp extends Application {
             setStatus("Deleted " + selected.getName());
         });
 
+        Button saveButton = new Button("Save");
+        saveButton.setOnAction(event -> {
+            try {
+                manager.save();
+                setStatus("Saved data");
+            } catch (IOException ex) {
+                setStatus("Save failed: " + ex.getMessage());
+            }
+        });
+
+        Button loadButton = new Button("Load");
+        loadButton.setOnAction(event -> {
+            try {
+                manager.load();
+                refreshViews();
+                setStatus("Loaded data");
+            } catch (IOException ex) {
+                setStatus("Load failed: " + ex.getMessage());
+            }
+        });
+
+        Button exportButton = new Button("Export CSV");
+        exportButton.setOnAction(event -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Export inventory CSV");
+            chooser.setInitialFileName("fridgemate-share.csv");
+            File file = chooser.showSaveDialog(stage);
+            if (file == null) {
+                return;
+            }
+            try {
+                manager.exportInventory(file.toPath());
+                setStatus("Exported CSV");
+            } catch (IOException ex) {
+                setStatus("Export failed: " + ex.getMessage());
+            }
+        });
+
+        Button importButton = new Button("Import CSV");
+        importButton.setOnAction(event -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Import inventory CSV");
+            File file = chooser.showOpenDialog(stage);
+            if (file == null) {
+                return;
+            }
+            try {
+                manager.importInventory(file.toPath());
+                refreshViews();
+                setStatus("Imported CSV");
+            } catch (IOException ex) {
+                setStatus("Import failed: " + ex.getMessage());
+            }
+        });
+
         GridPane form = new GridPane();
         form.setHgap(8);
         form.setVgap(8);
@@ -141,7 +211,7 @@ public class FridgeMateApp extends Application {
         form.addRow(3, new Label("Quantity"), quantitySpinner);
         form.addRow(4, new Label("Expiration"), expirationPicker);
 
-        HBox actions = new HBox(8, addButton, deleteButton);
+        HBox actions = new HBox(8, addButton, deleteButton, saveButton, loadButton, exportButton, importButton);
         VBox panel = new VBox(10, new Label("Inventory"), form, actions, inventoryTable);
         panel.setPrefWidth(660);
         return panel;
