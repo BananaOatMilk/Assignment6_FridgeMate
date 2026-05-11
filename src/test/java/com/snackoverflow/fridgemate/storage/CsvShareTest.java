@@ -57,4 +57,30 @@ class CsvShareTest {
         assertEquals("1,Greek Yogurt,FRIDGE,2", lines.get(1));
         assertEquals("2,\"bread, whole wheat\",,", lines.get(2));
     }
+    @Test
+    void exportGroceryListWithEmptyListCreatesOnlyHeader(@TempDir Path tempDir) throws IOException {
+        CsvShare csv = new CsvShare();
+        Path file = tempDir.resolve("empty.csv");
+    
+        csv.exportGroceryList(List.of(), List.of(), file);
+        List<String> lines = Files.readAllLines(file);
+    
+        assertEquals(List.of("No.,Item,Location,Previous Qty"), lines);
+    }
+    @Test
+    void exportGroceryListWithNoInventoryLeavesFieldsBlank(@TempDir Path tempDir) throws IOException {
+        CsvShare csv = new CsvShare();
+        Path file = tempDir.resolve("no-inventory.csv");
+    
+        csv.exportGroceryList(List.of("Milk"), List.of(), file);
+        List<String> lines = Files.readAllLines(file);
+    
+        assertEquals(
+                List.of(
+                        "No.,Item,Location,Previous Qty",
+                        "1,Milk,,"
+                ),
+                lines
+        );
+    }
 }
