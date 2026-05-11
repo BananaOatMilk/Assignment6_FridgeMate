@@ -348,7 +348,4 @@ public class FridgeMateApp extends Application {
         statusLabel.setText(message);
     }
 
-    public static void main(String[] args) {
-        launch(args);
-    }
 }

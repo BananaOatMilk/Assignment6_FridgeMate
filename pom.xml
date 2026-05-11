@@ -47,7 +47,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>com.snackoverflow.fridgemate.FridgeMateApp</mainClass>
+                    <mainClass>com.snackoverflow.fridgemate.FridgeMateLauncher</mainClass>
                 </configuration>
             </plugin>
         </plugins>
