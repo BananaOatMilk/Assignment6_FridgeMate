@@ -25,6 +25,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -63,7 +64,8 @@ public class FridgeMateApp extends Application {
 
     private TableView<FoodItem> inventoryTable;
     private ComboBox<FoodCategory> filterCategoryBox;
-    private ComboBox<StorageLocation> filterLocationBox;
+    private ComboBox<String> viewModeBox;
+    private ComboBox<StorageLocation> viewLocationBox;
     private Label statusLabel;
 
     @Override
@@ -138,8 +140,23 @@ public class FridgeMateApp extends Application {
 
         filterCategoryBox = new ComboBox<>(FXCollections.observableArrayList(FoodCategory.values()));
         filterCategoryBox.setPromptText("Filter category");
-        filterLocationBox = new ComboBox<>(FXCollections.observableArrayList(StorageLocation.values()));
-        filterLocationBox.setPromptText("Filter location");
+
+        viewModeBox = new ComboBox<>(FXCollections.observableArrayList("View all", "View by location"));
+        viewModeBox.setValue("View all");
+        viewLocationBox = new ComboBox<>(FXCollections.observableArrayList(StorageLocation.values()));
+        viewLocationBox.setPromptText("Select location");
+        viewLocationBox.setDisable(true);
+
+        viewModeBox.setOnAction(event -> {
+            boolean byLocation = "View by location".equals(viewModeBox.getValue());
+            viewLocationBox.setDisable(!byLocation);
+            if (!byLocation) {
+                viewLocationBox.setValue(null);
+            }
+            applyCurrentFilter();
+        });
+
+        viewLocationBox.setOnAction(event -> applyCurrentFilter());
 
         Button applyFilterButton = new Button("Apply Filter");
         applyFilterButton.setOnAction(event -> applyCurrentFilter());
@@ -147,7 +164,9 @@ public class FridgeMateApp extends Application {
         Button clearFilterButton = new Button("Clear Filter");
         clearFilterButton.setOnAction(event -> {
             filterCategoryBox.setValue(null);
-            filterLocationBox.setValue(null);
+            viewModeBox.setValue("View all");
+            viewLocationBox.setValue(null);
+            viewLocationBox.setDisable(true);
             applyCurrentFilter();
             setStatus("Cleared filters");
         });
@@ -212,39 +231,21 @@ public class FridgeMateApp extends Application {
             }
         });
 
-        Button exportButton = new Button("Export CSV");
+        Button exportButton = new Button("Export Grocery CSV");
         exportButton.setMinWidth(95);
         exportButton.setOnAction(event -> {
             FileChooser chooser = new FileChooser();
-            chooser.setTitle("Export inventory CSV");
-            chooser.setInitialFileName("fridgemate-share.csv");
+            chooser.setTitle("Export grocery list CSV");
+            chooser.setInitialFileName("fridgemate-grocery.csv");
             File file = chooser.showSaveDialog(stage);
             if (file == null) {
                 return;
             }
             try {
-                manager.exportInventory(file.toPath());
-                setStatus("Exported CSV");
+                manager.exportGroceryList(file.toPath());
+                setStatus("Exported grocery CSV");
             } catch (IOException ex) {
                 setStatus("Export failed: " + ex.getMessage());
-            }
-        });
-
-        Button importButton = new Button("Import CSV");
-        importButton.setMinWidth(95);
-        importButton.setOnAction(event -> {
-            FileChooser chooser = new FileChooser();
-            chooser.setTitle("Import inventory CSV");
-            File file = chooser.showOpenDialog(stage);
-            if (file == null) {
-                return;
-            }
-            try {
-                manager.importInventory(file.toPath());
-                refreshViews();
-                setStatus("Imported CSV");
-            } catch (IOException ex) {
-                setStatus("Import failed: " + ex.getMessage());
             }
         });
 
@@ -257,13 +258,18 @@ public class FridgeMateApp extends Application {
         form.addRow(3, new Label("Quantity"), quantitySpinner);
         form.addRow(4, new Label("Expiration"), expirationPicker);
 
-        HBox filterRow = new HBox(8, filterCategoryBox, filterLocationBox, applyFilterButton, clearFilterButton);
-        HBox actions = new HBox(8, addButton, deleteButton, saveButton, loadButton, exportButton, importButton);
+        HBox filterRow = new HBox(8, viewModeBox, viewLocationBox, filterCategoryBox, applyFilterButton, clearFilterButton);
+        HBox actions = new HBox(8, addButton, deleteButton, saveButton, loadButton, exportButton);
 
         Label sectionTitle = new Label("Inventory");
         sectionTitle.setStyle(SECTION_TITLE_STYLE);
 
-        VBox panel = new VBox(10, sectionTitle, form, filterRow, actions, inventoryTable);
+        VBox inventoryViewContent = new VBox(10, filterRow, inventoryTable);
+        TitledPane viewInventoryPane = new TitledPane("View Inventory", inventoryViewContent);
+        viewInventoryPane.setExpanded(false);
+        viewInventoryPane.setAnimated(false);
+
+        VBox panel = new VBox(10, sectionTitle, form, actions, viewInventoryPane);
         panel.setPrefWidth(650);
         panel.setStyle(CARD_STYLE);
         return panel;
@@ -333,7 +339,12 @@ public class FridgeMateApp extends Application {
 
     private void applyCurrentFilter() {
         FoodCategory category = filterCategoryBox == null ? null : filterCategoryBox.getValue();
-        StorageLocation location = filterLocationBox == null ? null : filterLocationBox.getValue();
+        StorageLocation location = null;
+
+        if (viewModeBox != null && "View by location".equals(viewModeBox.getValue()) && viewLocationBox != null) {
+            location = viewLocationBox.getValue();
+        }
+
         inventoryRows.setAll(manager.filterInventory(category, location));
     }
 

@@ -1,66 +1,54 @@
 package com.snackoverflow.fridgemate.storage;
 
-import com.snackoverflow.fridgemate.model.FoodCategory;
 import com.snackoverflow.fridgemate.model.FoodItem;
-import com.snackoverflow.fridgemate.model.StorageLocation;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 public class CsvShare {
-    public void exportItems(List<FoodItem> items, Path path) throws IOException {
+    public void exportGroceryList(List<String> groceryItems, Collection<FoodItem> inventoryItems, Path path) throws IOException {
         List<String> lines = new ArrayList<>();
-        lines.add("id,name,description,category,location,quantity,dateAdded,expirationDate");
+        lines.add("No.,Item,Location,Previous Qty");
 
-        for (FoodItem item : items) {
-            lines.add(String.join(",",
-                    escape(item.getId()),
-                    escape(item.getName()),
-                    escape(item.getDescription()),
-                    item.getCategory().name(),
-                    item.getLocation().name(),
-                    String.valueOf(item.getQuantity()),
-                    item.getDateAdded().toString(),
-                    item.getExpirationDate().toString()));
+        for (int i = 0; i < groceryItems.size(); i++) {
+            String groceryItem = groceryItems.get(i);
+            Optional<FoodItem> match = findByName(inventoryItems, groceryItem);
+            String location = match.map(item -> item.getLocation().name()).orElse("");
+            String qty = match.map(item -> String.valueOf(item.getQuantity())).orElse("");
+
+            lines.add((i + 1)
+                    + "," + escapeCsv(groceryItem)
+                    + "," + escapeCsv(location)
+                    + "," + escapeCsv(qty));
         }
 
         Files.write(path, lines);
     }
 
-    public List<FoodItem> importItems(Path path) throws IOException {
-        List<String> lines = Files.readAllLines(path);
-        List<FoodItem> items = new ArrayList<>();
+    private Optional<FoodItem> findByName(Collection<FoodItem> inventoryItems, String itemName) {
+        if (itemName == null) {
+            return Optional.empty();
+        }
+        String name = itemName.trim().toLowerCase(Locale.ROOT);
+        return inventoryItems.stream()
+                .filter(item -> item.getName().trim().toLowerCase(Locale.ROOT).equals(name))
+                .findFirst();
+    }
 
-        for (int i = 1; i < lines.size(); i++) {
-            String[] parts = lines.get(i).split(",", -1);
-            if (parts.length < 8) {
-                continue;
-            }
-
-            FoodItem item = new FoodItem(
-                    unescape(parts[0]),
-                    unescape(parts[1]),
-                    unescape(parts[2]),
-                    FoodCategory.valueOf(parts[3]),
-                    StorageLocation.valueOf(parts[4]),
-                    Integer.parseInt(parts[5]),
-                    LocalDate.parse(parts[6]),
-                    LocalDate.parse(parts[7]));
-            items.add(item);
+    private String escapeCsv(String value) {
+        if (value == null) {
+            return "";
         }
 
-        return items;
-    }
-
-    private String escape(String value) {
-        return value == null ? "" : value.replace(",", " ").replace("\n", " ");
-    }
-
-    private String unescape(String value) {
-        return value;
+        String cleaned = value.replace("\r", " ").replace("\n", " ");
+        boolean needsQuotes = cleaned.contains(",") || cleaned.contains("\"");
+        String escaped = cleaned.replace("\"", "\"\"");
+        return needsQuotes ? "\"" + escaped + "\"" : escaped;
     }
 }

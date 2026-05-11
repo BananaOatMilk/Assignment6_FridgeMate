@@ -88,14 +88,9 @@ public class FridgeMateManager {
         storage.save(data);
     }
 
-    public void exportInventory(Path path) throws IOException {
+    public void exportGroceryList(Path path) throws IOException {
         requireCsvShare();
-        csvShare.exportItems(inventory.getAllItems(), path);
-    }
-
-    public void importInventory(Path path) throws IOException {
-        requireCsvShare();
-        inventory.replaceAll(csvShare.importItems(path));
+        csvShare.exportGroceryList(groceryList.getItems(), inventory.getAllItems(), path);
     }
 
     private void requireStorage() {
