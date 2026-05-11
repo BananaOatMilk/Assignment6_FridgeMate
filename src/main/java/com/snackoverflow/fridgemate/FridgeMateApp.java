@@ -39,6 +39,17 @@ import java.time.LocalDate;
 import java.util.function.Function;
 
 public class FridgeMateApp extends Application {
+    private static final String CARD_STYLE =
+            "-fx-background-color: #ffffff;" +
+            "-fx-border-color: #d8dde6;" +
+            "-fx-border-radius: 10;" +
+            "-fx-background-radius: 10;" +
+            "-fx-padding: 12;";
+
+    private static final String SECTION_TITLE_STYLE =
+            "-fx-font-size: 16px;" +
+            "-fx-font-weight: bold;";
+
     private final FridgeMateManager manager = new FridgeMateManager(
             new Inventory(new DefaultExpirationPolicy(7)),
             new GroceryList(),
@@ -58,21 +69,28 @@ public class FridgeMateApp extends Application {
     @Override
     public void start(Stage stage) {
         BorderPane root = new BorderPane();
-        root.setPadding(new Insets(12));
+        root.setPadding(new Insets(14));
+        root.setStyle("-fx-background-color: #f4f6f9;");
 
         Label title = new Label("FridgeMate");
-        title.setStyle("-fx-font-size: 22px; -fx-font-weight: bold;");
-        root.setTop(title);
+        title.setStyle("-fx-font-size: 28px; -fx-font-weight: bold;");
+        Label subtitle = new Label("Track inventory, grocery needs, and expiring items");
+        subtitle.setStyle("-fx-text-fill: #5c6678;");
+        VBox header = new VBox(2, title, subtitle);
+        header.setPadding(new Insets(0, 0, 8, 2));
+        root.setTop(header);
 
         inventoryTable = createInventoryTable();
         VBox inventoryPanel = createInventoryPanel(stage);
         VBox groceryPanel = createGroceryPanel();
         VBox expiringPanel = createExpiringPanel();
 
-        HBox center = new HBox(12, inventoryPanel, groceryPanel, expiringPanel);
+        HBox center = new HBox(14, inventoryPanel, groceryPanel, expiringPanel);
         root.setCenter(center);
 
         statusLabel = new Label("Ready");
+        statusLabel.setStyle("-fx-text-fill: #334155; -fx-font-size: 12px;");
+        BorderPane.setMargin(statusLabel, new Insets(8, 2, 0, 2));
         root.setBottom(statusLabel);
 
         try {
@@ -101,6 +119,7 @@ public class FridgeMateApp extends Application {
                 column("Expires", item -> item.getExpirationDate().toString())
         );
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+        table.setPrefHeight(420);
         return table;
     }
 
@@ -134,6 +153,7 @@ public class FridgeMateApp extends Application {
         });
 
         Button addButton = new Button("Add Item");
+        addButton.setMinWidth(88);
         addButton.setOnAction(event -> {
             try {
                 FoodItem item = new FoodItem(
@@ -157,6 +177,7 @@ public class FridgeMateApp extends Application {
         });
 
         Button deleteButton = new Button("Delete Selected");
+        deleteButton.setMinWidth(110);
         deleteButton.setOnAction(event -> {
             FoodItem selected = inventoryTable.getSelectionModel().getSelectedItem();
             if (selected == null) {
@@ -169,6 +190,7 @@ public class FridgeMateApp extends Application {
         });
 
         Button saveButton = new Button("Save");
+        saveButton.setMinWidth(70);
         saveButton.setOnAction(event -> {
             try {
                 manager.save();
@@ -179,6 +201,7 @@ public class FridgeMateApp extends Application {
         });
 
         Button loadButton = new Button("Load");
+        loadButton.setMinWidth(70);
         loadButton.setOnAction(event -> {
             try {
                 manager.load();
@@ -190,6 +213,7 @@ public class FridgeMateApp extends Application {
         });
 
         Button exportButton = new Button("Export CSV");
+        exportButton.setMinWidth(95);
         exportButton.setOnAction(event -> {
             FileChooser chooser = new FileChooser();
             chooser.setTitle("Export inventory CSV");
@@ -207,6 +231,7 @@ public class FridgeMateApp extends Application {
         });
 
         Button importButton = new Button("Import CSV");
+        importButton.setMinWidth(95);
         importButton.setOnAction(event -> {
             FileChooser chooser = new FileChooser();
             chooser.setTitle("Import inventory CSV");
@@ -234,28 +259,40 @@ public class FridgeMateApp extends Application {
 
         HBox filterRow = new HBox(8, filterCategoryBox, filterLocationBox, applyFilterButton, clearFilterButton);
         HBox actions = new HBox(8, addButton, deleteButton, saveButton, loadButton, exportButton, importButton);
-        VBox panel = new VBox(10, new Label("Inventory"), form, filterRow, actions, inventoryTable);
+
+        Label sectionTitle = new Label("Inventory");
+        sectionTitle.setStyle(SECTION_TITLE_STYLE);
+
+        VBox panel = new VBox(10, sectionTitle, form, filterRow, actions, inventoryTable);
         panel.setPrefWidth(650);
+        panel.setStyle(CARD_STYLE);
         return panel;
     }
 
     private VBox createGroceryPanel() {
         ListView<String> groceryListView = new ListView<>(groceryRows);
+        groceryListView.setPrefHeight(480);
 
         Button addLowStock = new Button("Add Low-Stock Items");
+        addLowStock.setMaxWidth(Double.MAX_VALUE);
         addLowStock.setOnAction(event -> {
             int added = manager.addLowStockItemsToGrocery(1);
             refreshViews();
             setStatus("Added " + added + " low-stock item(s)");
         });
 
-        VBox panel = new VBox(10, new Label("Grocery List"), addLowStock, groceryListView);
+        Label sectionTitle = new Label("Grocery List");
+        sectionTitle.setStyle(SECTION_TITLE_STYLE);
+
+        VBox panel = new VBox(10, sectionTitle, addLowStock, groceryListView);
         panel.setPrefWidth(260);
+        panel.setStyle(CARD_STYLE);
         return panel;
     }
 
     private VBox createExpiringPanel() {
         ListView<FoodItem> expiringList = new ListView<>(expiringRows);
+        expiringList.setPrefHeight(480);
         expiringList.setCellFactory(list -> new ListCell<>() {
             @Override
             protected void updateItem(FoodItem item, boolean empty) {
@@ -270,10 +307,15 @@ public class FridgeMateApp extends Application {
         });
 
         Button refreshButton = new Button("Refresh Expiring");
+        refreshButton.setMaxWidth(Double.MAX_VALUE);
         refreshButton.setOnAction(event -> refreshViews());
 
-        VBox panel = new VBox(10, new Label("Expiring Soon"), refreshButton, expiringList);
+        Label sectionTitle = new Label("Expiring Soon");
+        sectionTitle.setStyle(SECTION_TITLE_STYLE);
+
+        VBox panel = new VBox(10, sectionTitle, refreshButton, expiringList);
         panel.setPrefWidth(280);
+        panel.setStyle(CARD_STYLE);
         return panel;
     }
 
