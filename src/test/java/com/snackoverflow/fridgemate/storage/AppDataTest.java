@@ -16,4 +16,20 @@ class AppDataTest {
         assertEquals(List.of(), data.getItems());
         assertEquals(List.of(), data.getGroceryItems());
     }
+    @Test
+    void defaultAppDataStartsWithEmptyLists() {
+        AppData data = new AppData();
+        assertEquals(List.of(), data.getItems());
+        assertEquals(List.of(), data.getGroceryItems());
+    }
+
+    @Test
+    void emptyListsRemainEmpty() {
+        AppData data = new AppData();
+        data.setItems(List.of());
+        data.setGroceryItems(List.of());
+
+        assertEquals(List.of(), data.getItems());
+        assertEquals(List.of(), data.getGroceryItems());
+}
 }
