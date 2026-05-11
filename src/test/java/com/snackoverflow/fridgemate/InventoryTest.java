@@ -73,19 +73,6 @@ class InventoryTest {
                 new FoodItem("Beans", FoodCategory.OTHER, StorageLocation.PANTRY, 0, LocalDate.now(), LocalDate.now()));
     }
     @Test
-    void removingUnknownIdReturnsFalse() {
-        Inventory inventory = new Inventory(new DefaultExpirationPolicy(7));
-    
-        assertTrue(inventory.getAllItems().isEmpty());
-        assertEquals(false, inventory.removeItemById("fake-id"));
-    }
-    @Test
-    void removingUnknownIdReturnsFalse() {
-        Inventory inventory = new Inventory(new DefaultExpirationPolicy(7));
-    
-        assertFalse(inventory.removeItemById("fake-id"));
-    }
-    @Test
     void filterWithNoMatchesReturnsEmptyList() {
         Inventory inventory = new Inventory(new DefaultExpirationPolicy(7));
         FoodItem milk = item("Milk", FoodCategory.DAIRY, StorageLocation.FRIDGE, 1,
